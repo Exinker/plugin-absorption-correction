@@ -1,0 +1,2 @@
+class AtomFilepath(str):
+    pass
