@@ -19,6 +19,7 @@ class FilepathParser:
         LOGGER.debug('Parse xml with filepath to data.')
         try:
             filepath = cls._parse(xml)
+
         except ParseFilepathXMLError as error:
             LOGGER.error('%r', error)
             raise
@@ -34,6 +35,7 @@ class FilepathParser:
 
         try:
             filepath = ET.fromstring(xml).text
+
         except ParseError as error:
             raise ParseFilepathXMLError('Config xml is not parsed!') from error
 

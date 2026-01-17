@@ -1,6 +1,8 @@
 import os
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from datetime import datetime
+from itertools import chain
 from pathlib import Path
 from typing import Callable, NewType
 
@@ -11,12 +13,17 @@ from matplotlib.figure import Figure
 
 import plugin
 from plugin.dto import AtomDatum
-from spectrumapp.helpers import find_tab, getdefault_object_name
+from spectrumapp.helpers import find_tab, find_window, getdefault_object_name
 from spectrumapp.types import Lims
 from spectrumapp.widgets.graph_widget import MplCanvas
+from spectrumapp.windows.report_issue_window import ReportIssueWindow
+from spectrumapp.windows.report_issue_window.archive_managers import ZipArchiveManager
+from spectrumapp.windows.report_issue_window.archive_managers.utils import explore
+from spectrumapp.windows.report_issue_window.report_managers import TelegramReportManager
 from spectrumlab.picture.alphas import ALPHA
 from spectrumlab.picture.colors import COLOR
 from spectrumlab.types import Frame, R
+
 
 Index = NewType('Index', str)
 
@@ -655,7 +662,7 @@ class ContentWidget(QtWidgets.QTabWidget):
         super().__init__(*args, **kwargs)
 
         for column_id, nickname in zip(column_ids, nicknames):
-            self.addTab(TabWidget(column_id=column_id), nickname[::-1])
+            self.addTab(TabWidget(column_id=column_id), nickname)
 
 
 class PreviewWindow(QtWidgets.QWidget):
@@ -664,19 +671,34 @@ class PreviewWindow(QtWidgets.QWidget):
         self,
         *args,
         data: Mapping[str, AtomDatum],
-        callback: Callable[[tuple[R, R], Frame], Frame],
+        update_callback: Callable[[tuple[R, R], Frame], Frame],
+        dump_callback: Callable[[], None],
         flags: Mapping[QtCore.Qt.WindowType, bool] | None = None,
         **kwargs,
     ) -> None:
         super().__init__()
 
         self._data = data
-        self._callback = callback
+        self._update_callback = update_callback
+        self._dump_callback = dump_callback
 
         self.setObjectName('previewWindow')
 
         # title
         self.setWindowTitle(' '.join(map(lambda x: x.capitalize(), plugin.__name__.split('-'))))
+
+        # actions
+        action = QtGui.QAction('&Save', self)
+        action.setShortcut(QtGui.QKeySequence('Ctrl+S'))
+        action.setShortcutContext(QtCore.Qt.ApplicationShortcut)
+        action.triggered.connect(self.on_saved)
+        self.addAction(action)
+
+        action = QtGui.QAction('&Report Issue', self)
+        action.setShortcut(QtGui.QKeySequence('Ctrl+Shift+I'))
+        action.setShortcutContext(QtCore.Qt.ApplicationShortcut)
+        action.triggered.connect(self.on_report_issue_window_opened)
+        self.addAction(action)
 
         # flags
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.CustomizeWindowHint)
@@ -724,19 +746,59 @@ class PreviewWindow(QtWidgets.QWidget):
         # show window
         self.show()
 
+    def on_saved(self, *args, **kwargs):
+        """Save a dump."""
+
+        self._dump_callback()
+
+    def on_report_issue_window_opened(self, *args, **kwargs):
+        """Report an issue."""
+
+        self._dump_callback()
+
+        window = find_window('reportIssueWindow')
+        if window is not None:
+            window.show()
+        else:
+
+            timestamp = datetime.timestamp(datetime.now())
+            window = ReportIssueWindow(
+                timestamp=timestamp,
+                archive_manager=ZipArchiveManager(
+                    files=chain(
+                        explore([
+                            Path.cwd() / '.env',
+                            Path.cwd() / '.log',
+                            Path.cwd() / 'results.xml',
+                        ], prefix=Path.cwd()),
+                        explore([
+                            Path.cwd().parents[2] / 'Temp' / 'py_table.xml',
+                        ], prefix=Path.cwd().parents[2] / 'Temp'),
+                    ),
+                    archive_name='{}'.format(int(timestamp)),
+                ),
+                report_manager=TelegramReportManager.create(
+                    timestamp=timestamp,
+                    token=os.environ.get('TELEGRAM_TOKEN', ''),
+                    chat_id=os.environ.get('TELEGRAM_CHAT_ID', ''),
+                ),
+                parent=self,
+                flags=QtCore.Qt.Window | QtCore.Qt.WindowStaysOnTopHint,
+            )
+
     def update(
         self,
         column_id: int,
         bounds: tuple[R, R] | None,
     ) -> None:
         datum = self._data[column_id]
-        bounds, frame = self._callback(
+        bounds, frame = self._update_callback(
             column_id=column_id,
             frame=datum.frame,
             bounds=bounds,
         )
 
-        widget = find_tab(self.content_widget, text=datum.nickname[::-1])
+        widget = find_tab(self.content_widget, text=datum.nickname)
         widget.update(
             frame=frame,
             bounds=bounds,

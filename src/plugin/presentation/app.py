@@ -14,7 +14,8 @@ LOGGER = logging.getLogger('plugin-absorption-correction')
 
 def retrieve_transformer(
     data: Mapping[str, AtomDatum],
-    callback: Callable[[tuple[R, R], Frame], Frame],
+    update_callback: Callable[[tuple[R, R], Frame], Frame],
+    dump_callback: Callable[[], None],
     quiet: bool = False,
 ) -> None:
 
@@ -22,7 +23,8 @@ def retrieve_transformer(
 
     window = PreviewWindow(
         data=data,
-        callback=callback,
+        update_callback=update_callback,
+        dump_callback=dump_callback,
     )
     for column_id, datum in data.items():
         window.update(
@@ -32,9 +34,12 @@ def retrieve_transformer(
 
     try:
         app.exec()
+
     except Exception:
         raise
+
     else:
         return None
+
     finally:
         app.quit()

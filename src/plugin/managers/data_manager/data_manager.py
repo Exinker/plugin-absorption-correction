@@ -15,6 +15,7 @@ from plugin.managers.data_manager.parsers import (
 )
 from plugin.types import XML
 
+
 LOGGER = logging.getLogger('plugin-absorption-correction')
 
 
@@ -28,11 +29,14 @@ class DataManager:
         started_at = time.perf_counter()
         try:
             filepath = FilepathParser.parse(xml)
+
         except ParseFilepathXMLError as error:
             LOGGER.error('%r', error)
             raise
+
         else:
             LOGGER.info('Filepath to data: %r', filepath)
+
         finally:
             if LOGGER.isEnabledFor(logging.INFO):
                 LOGGER.info(
@@ -44,10 +48,13 @@ class DataManager:
         started_at = time.perf_counter()
         try:
             atom_data = AtomDataParser.parse(filepath)
+
         except (LoadDataXMLError, ParseDataXMLError) as error:
             raise DataManagerError from error
+
         else:
             return atom_data
+
         finally:
             if LOGGER.isEnabledFor(logging.INFO):
                 LOGGER.info(

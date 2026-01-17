@@ -14,11 +14,12 @@ class Plugin:
     def create(cls) -> Self:
 
         data_manager = DataManager()
-        correction_manager = CorrectionManager(
-            plugin_config=PLUGIN_CONFIG,
-        )
         report_manager = ReportManager(
             plugin_config=PLUGIN_CONFIG,
+        )
+        correction_manager = CorrectionManager(
+            plugin_config=PLUGIN_CONFIG,
+            report_manager=report_manager,
         )
 
         return Plugin(
