@@ -23,12 +23,14 @@ class AtomDataParser:
         LOGGER.debug('Load data from: %r', filepath)
         try:
             xml = load_xml(filepath)
+
         except LoadDataXMLError:
             raise
 
         LOGGER.debug('Parse data from: %r', filepath)
         try:
             data = parse_xml(filepath, xml)
+
         except ParseDataXMLError:
             raise
 
@@ -41,6 +43,7 @@ def load_xml(__filepath: AtomFilepath) -> XML | None:
 
     try:
         tree = ElementTree.parse(__filepath)
+
     except FileNotFoundError as error:
         LOGGER.error('Parse `xml` failed: %r', error)
         raise LoadDataXMLError('File not found: {!r}!'.format(__filepath)) from error
@@ -53,15 +56,18 @@ def parse_xml(__filepath: AtomFilepath, xml: XML) -> 'AtomData':
 
     try:
         meta = AtomMetaParser.parse(xml=xml)
+
     except Exception as error:
         LOGGER.error('Parse `meta` failed: %r', error)
         raise ParseMetaXMLError from error
 
     try:
         data = AtomTableParser.from_xml(xml)
+
     except ParseTableXMLError as error:
         LOGGER.error('Parse `data` failed: %r', error)
         raise ParseTableXMLError from error
+
     except Exception as error:
         LOGGER.error('Parse `data` failed with unexpected error: %r', error)
         raise ParseTableXMLError from error

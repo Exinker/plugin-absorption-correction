@@ -10,6 +10,7 @@ atom/
 build/
 data/
 dist/
+dumps/
 htmlcov/
 img/
 spd/
@@ -20,6 +21,7 @@ spd/
 *.env
 *.in
 *.xml
+settings.ini
 
 .*.ini
 .*.ipynb

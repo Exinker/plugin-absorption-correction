@@ -1,10 +1,12 @@
 import logging
 import time
 from collections.abc import Mapping
+from functools import partial
 
 from plugin.config import PluginConfig
 from plugin.dto import AtomDatum
 from plugin.managers.correction_manager.core import process_data
+from plugin.managers.report_manager import ReportManager
 from plugin.presentation import retrieve_transformer
 from spectrumlab.peaks.analyte_peaks.intensity.transformers import (
     RegressionIntensityTransformer,
@@ -22,11 +24,13 @@ class CorrectionManager:
     def __init__(
         self,
         plugin_config: PluginConfig,
+        report_manager: ReportManager,
     ) -> None:
 
         self.plugin_config = plugin_config
+        self.report_manager = report_manager
 
-        self.transformer = {}
+        self.transformers = None
 
     def retrieve(
         self,
@@ -35,28 +39,48 @@ class CorrectionManager:
         started_at = time.perf_counter()
 
         LOGGER.debug(
-            'Start to restoring transformer...',
+            'Start to retrieve transformers...',
         )
+
+        self.transformers = {}
         try:
             retrieve_transformer(
                 data=data,
-                callback=self.update,
+                update_callback=self.update,
+                dump_callback=partial(self.dump, data=data),
             )
+
         except Exception as error:
             LOGGER.error(
-                'Time elapsed for restoring: {elapsed:.4f}, s'.format(
+                'Time elapsed for retrieving: {elapsed:.4f}, s'.format(
                     elapsed=time.perf_counter() - started_at,
                 ),
             )
+
         else:
-            return self.transformer
+            return self.transformers
+
         finally:
             if LOGGER.isEnabledFor(logging.INFO):
                 LOGGER.info(
-                    'Time elapsed for restoring: {elapsed:.4f}, s'.format(
+                    'Time elapsed for retrieving: {elapsed:.4f}, s'.format(
                         elapsed=time.perf_counter() - started_at,
                     ),
                 )
+
+    def dump(
+        self,
+        data: Mapping[str, AtomDatum],
+    ) -> None:
+        assert self.transformers is not None
+
+        report = self.report_manager.build(
+            data=data,
+            transformers=self.transformers,
+        )
+        self.report_manager.dump(
+            report=report,
+        )
 
     def update(
         self,
@@ -64,16 +88,18 @@ class CorrectionManager:
         frame: Frame,
         bounds: tuple[R, R] | None,
     ) -> tuple[tuple[R, R], Frame]:
+        assert self.transformers is not None
+
         data = process_frame(frame)
         bounds = bounds or estimate_bounds(data)
 
-        self.transformer[column_id] = RegressionIntensityTransformer.create(
+        self.transformers[column_id] = RegressionIntensityTransformer.create(
             data=data,
             bounds=bounds,
         )
 
         processed_data = process_data(
             frame,
-            transformer=self.transformer[column_id],
+            transformer=self.transformers[column_id],
         )
         return bounds, processed_data

@@ -1,6 +1,6 @@
 [project]
 name = "plugin"
-version = "0.4.0"
+version = "0.4.1"
 description = "Atom's plugin to process absorption signals."
 readme = "README.md"
 keywords = [
@@ -58,6 +58,6 @@ where = ["src"]
 "*" = ["*.csv", "*.md", "*.txt", "*.xml"]
 
 [tool.uv.sources]
-spectrumapp = { git = "https://github.com/Exinker/spectrumapp", rev = "master" }
+spectrumapp = { git = "https://github.com/Exinker/spectrumapp", rev = "1.1.1" }
 spectrumlab = { git = "https://github.com/Exinker/spectrumlab", rev = "0.9.0" }
 spectrumlab_emulations = { git = "https://github.com/Exinker/spectrumlab-emulations", rev = "0.1.2" }

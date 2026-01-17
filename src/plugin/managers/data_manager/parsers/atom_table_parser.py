@@ -75,6 +75,7 @@ class AtomTableParser:
                             if __graph.find('bad'):
                                 mask = parse_mask(__graph)
                                 value = np.where(~mask, value, np.nan)
+
                         except Exception as error:
                             LOGGER.error(
                                 'Parse column %d failed', column_id,
@@ -143,6 +144,7 @@ def parse_intensity(__graph: XML) -> Array[float]:
 
     try:
         return numpy_array_from_b64(__graph.find(xpath).text, dtype=np.float32)
+
     except Exception:
         LOGGER.error("Parse `intensity` failed. Check xpath: %r", xpath)
         raise
@@ -155,6 +157,7 @@ def parse_mask(__graph: XML) -> Array[bool]:
         mask = np.full(int(__graph.find(xpath).get('value_array_size')), False)
         mask[numpy_array_from_b64(__graph.find('bad').text, dtype=np.int32)] = True
         return mask
+
     except Exception:
         LOGGER.error("Parse `intensity` failed. Check xpath: %r", xpath)
         raise

@@ -106,9 +106,8 @@ class ReportManager:
     def dump(
         self,
         report: str,
-        filename: str | None = None,
+        filename: str = 'results',
     ) -> None:
-        filename = filename or 'results'
 
         filepath = f'{filename}.xml'
         with open(filepath, 'w') as file:
