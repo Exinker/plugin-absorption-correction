@@ -19,7 +19,7 @@ dependencies = [
     "spectrumapp",
     "spectrumlab",
 ]
-requires-python = ">=3.12"
+requires-python = "==3.12.*"
 
 [dependency-groups]
 linting = [
@@ -35,6 +35,7 @@ testing = [
     "pytest-cov",
     "pytest-faker>=2.0.0",
     "pytest-qt>=4.5.0",
+    "spectrumlab_emulations",
 ]
 notebook = [
     "jupyter>=1.1.1",
@@ -44,7 +45,6 @@ dev = [
     {include-group = "linting"},
     {include-group = "testing"},
     {include-group = "notebook"},
-    "spectrumlab_emulations",
 ]
 
 [build-system]
@@ -59,5 +59,5 @@ where = ["src"]
 
 [tool.uv.sources]
 spectrumapp = { git = "https://github.com/Exinker/spectrumapp", rev = "1.1.1" }
-spectrumlab = { git = "https://github.com/Exinker/spectrumlab", rev = "0.9.0" }
-spectrumlab_emulations = { git = "https://github.com/Exinker/spectrumlab-emulations", rev = "0.1.2" }
+spectrumlab = { git = "https://github.com/Exinker/spectrumlab", tag = "0.9.3a" }
+spectrumlab_emulations = { git = "https://github.com/Exinker/spectrumlab-emulations", tag = "0.1.3a" }
