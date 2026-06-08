@@ -27,6 +27,9 @@ def retrieve_transformer(
         dump_callback=dump_callback,
     )
     for column_id, datum in data.items():
+        LOGGER.debug(
+            'Update window for column %s', column_id,
+        )
         window.update(
             column_id=column_id,
             bounds=datum.bounds,

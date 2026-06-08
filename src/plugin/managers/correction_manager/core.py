@@ -12,18 +12,13 @@ def process_data(
 ) -> Frame:
 
     data = pd.DataFrame(
-        [
-            {
-                'probe': i,
-                'parallel': j,
-                'concentration': __data.loc[(i, j), 'concentration'],
-                'intensity': __data.loc[(i, j), 'intensity'],
-                'intensity_true': transformer.estimate_intensity(__data.loc[(i, j), 'concentration']),
-                'intensity_linearized': transformer(__data.loc[(i, j), 'intensity']),
-            }
-            for i, j in __data.drop(index='blank', errors='ignore').index
-        ],
-        columns=['probe', 'parallel', 'concentration', 'intensity', 'intensity_true', 'intensity_linearized'],
-    ).set_index(['probe', 'parallel'])
+        {
+            'concentration': __data['concentration'],
+            'intensity': __data['intensity'],
+            'intensity_true': transformer.estimate_intensity(__data['concentration']),
+            'intensity_linearized': transformer.apply(__data['intensity']),
+        },
+        index=__data.index,
+    )
 
     return data.sort_values(by='concentration')

@@ -90,6 +90,10 @@ class CorrectionManager:
     ) -> tuple[tuple[R, R], Frame]:
         assert self.transformers is not None
 
+        LOGGER.info(
+            'Retrieve transformer for column %s', column_id,
+        )
+
         data = process_frame(frame)
         bounds = bounds or estimate_bounds(data)
 
