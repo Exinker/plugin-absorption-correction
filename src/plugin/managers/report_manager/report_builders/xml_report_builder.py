@@ -1,3 +1,4 @@
+import logging
 import xml.etree.ElementTree as ElementTree
 from collections.abc import Mapping, Sequence
 from xml.dom import minidom
@@ -8,6 +9,9 @@ from spectrumlab.peaks.analyte_peaks.intensity.transformers import (
 )
 
 
+LOGGER = logging.getLogger('plugin-absorption-correction')
+
+
 class XMLReportBuilder:
 
     def build(
@@ -15,9 +19,18 @@ class XMLReportBuilder:
         data: Mapping[str, AtomDatum],
         transformers: Mapping[str, RegressionIntensityTransformer],
     ) -> str:
+        LOGGER.info(
+            'Start XML report building: columns=%d',
+            len(data),
+        )
 
         results = []
         for column_id, datum in data.items():
+            LOGGER.debug(
+                'Build XML report column: column=%s, nickname=%r',
+                column_id,
+                datum.nickname,
+            )
 
             results.append(dict(
                 id=column_id,
@@ -31,7 +44,13 @@ class XMLReportBuilder:
                 ),
             ))
 
-        return wrap(results)
+        report = wrap(results)
+        LOGGER.info(
+            'XML report built: columns=%d, size=%d',
+            len(results),
+            len(report),
+        )
+        return report
 
     def _build_bounds(
         self,
@@ -66,6 +85,8 @@ class XMLReportBuilder:
 
     @classmethod
     def default(cls) -> str:
+        LOGGER.info('Build default XML report.')
+
         root = ElementTree.Element('columns')
 
         ElementTree.SubElement(root, 'message', text='Absorption correction failed!')

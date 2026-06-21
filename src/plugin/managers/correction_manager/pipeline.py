@@ -55,6 +55,10 @@ class CorrectionPipeline:
             )
 
         else:
+            LOGGER.info(
+                'Correction transformers retrieved: columns=%d',
+                len(transformers),
+            )
             return transformers
 
         finally:
@@ -70,6 +74,10 @@ class CorrectionPipeline:
         data: Mapping[str, AtomDatum],
         transformers: Mapping[str, RegressionIntensityTransformer],
     ) -> None:
+        LOGGER.info(
+            'Dump correction report from pipeline: columns=%d',
+            len(transformers),
+        )
 
         report = self.report_manager.build(
             data=data,
@@ -98,5 +106,12 @@ class CorrectionPipeline:
         )
 
         transformers[column_id] = result.transformer
+
+        LOGGER.info(
+            'Transformer retrieved for column %s: bounds=%r, rows=%d',
+            column_id,
+            result.bounds,
+            len(result.frame),
+        )
 
         return result.bounds, result.frame

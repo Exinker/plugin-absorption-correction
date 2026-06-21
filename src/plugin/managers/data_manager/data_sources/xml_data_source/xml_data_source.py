@@ -22,6 +22,8 @@ LOGGER = logging.getLogger('plugin-absorption-correction')
 class XMLDataSource:
 
     def load(self, xml: XML | None = None) -> AtomData:
+        LOGGER.info('Start XML data source loading.')
+
         xml = xml or '<input>{path}</input>'.format(
             path=str(Path.cwd().parents[3] / 'Temp' / 'py_table.xml'),
         )
@@ -53,6 +55,11 @@ class XMLDataSource:
             raise DataSourceError from error
 
         else:
+            LOGGER.info(
+                'XML data source loaded: filepath=%r, columns=%d',
+                atom_data.filepath,
+                len(atom_data.data),
+            )
             return atom_data
 
         finally:

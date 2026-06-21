@@ -1,3 +1,5 @@
+import logging
+import time
 from typing import Self
 
 from plugin.config import PLUGIN_CONFIG
@@ -7,6 +9,9 @@ from plugin.managers.data_manager.data_sources import XMLDataSource
 from plugin.managers.data_manager import DataSourceManager
 from plugin.managers.report_manager import ReportManager, XMLReportBuilder
 from plugin.types import XML
+
+
+LOGGER = logging.getLogger('plugin-absorption-correction')
 
 
 class Plugin:
@@ -52,17 +57,34 @@ class Plugin:
         self,
         xml: XML,
     ) -> str:
+        started_at = time.perf_counter()
+
+        LOGGER.info('Start absorption correction plugin.')
 
         atom_data = self.data_manager.load(
             xml=xml,
         )
+        LOGGER.info(
+            'Atom data loaded: columns=%d',
+            len(atom_data.data),
+        )
+
         transformers = self.correction_pipeline.retrieve(
             data=atom_data.data,
         )
+        LOGGER.info(
+            'Correction transformers retrieved: columns=%d',
+            len(transformers),
+        )
+
         report = self.report_manager.build(
             data=atom_data.data,
             transformers=transformers,
             dump=True,
+        )
+        LOGGER.info(
+            'Absorption correction plugin finished: elapsed=%.4f, s',
+            time.perf_counter() - started_at,
         )
 
         return report

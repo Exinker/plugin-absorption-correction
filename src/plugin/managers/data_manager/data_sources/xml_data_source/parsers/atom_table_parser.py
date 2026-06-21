@@ -19,6 +19,7 @@ class AtomTableParser:
 
     @classmethod
     def from_xml(cls, __xml: XML) -> Mapping[str, AtomDatum]:
+        LOGGER.info('Start parsing Atom table.')
 
         # lines
         line = []
@@ -33,6 +34,10 @@ class AtomTableParser:
                 nickname=nickname,
             ))
         line = pd.DataFrame(line).set_index('line_id')
+        LOGGER.info(
+            'Visible Atom lines parsed: columns=%d',
+            len(line),
+        )
 
         # concentrations
         concentrations = defaultdict(list)
@@ -100,6 +105,10 @@ class AtomTableParser:
 
                 __bounds = __column.find('bounds')
                 bounds[column_id] = (float(__bounds.attrib['lb']), float(__bounds.attrib['ub']))
+        LOGGER.info(
+            'Saved correction bounds parsed: columns=%d',
+            len(bounds),
+        )
 
         # polynom
         polynom = defaultdict(list)
@@ -112,6 +121,10 @@ class AtomTableParser:
                 __polynom = __column.find('polynom')
                 for __point in __polynom.findall('point'):
                     polynom[column_id].append((float(__point.attrib['x']), float(__point.attrib['y'])))
+        LOGGER.info(
+            'Saved correction polynoms parsed: columns=%d',
+            len(polynom),
+        )
 
         # data
         data = {}
@@ -132,6 +145,10 @@ class AtomTableParser:
                 bounds=bounds.get(column_id),
                 polynom=polynom.get(column_id),
             )
+        LOGGER.info(
+            'Atom table parsed: columns=%d',
+            len(data),
+        )
         return data
 
 
