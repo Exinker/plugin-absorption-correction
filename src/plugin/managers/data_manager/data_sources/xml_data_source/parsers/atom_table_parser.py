@@ -8,7 +8,7 @@ import pandas as pd
 
 from plugin.config import PLUGIN_CONFIG
 from plugin.dto import AtomDatum
-from plugin.managers.data_manager.exceptions import ParseTableXMLError
+from plugin.managers.data_manager.data_sources.exceptions import ParseTableXMLError
 from plugin.types import XML
 from spectrumlab.types import Array
 

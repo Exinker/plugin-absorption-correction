@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET  # noqa: N817
 from xml.etree.ElementTree import ParseError
 
 from plugin.dto import AtomFilepath
-from plugin.managers.data_manager.exceptions import (
+from plugin.managers.data_manager.data_sources.exceptions import (
     ParseFilepathXMLError,
 )
 from plugin.types import XML

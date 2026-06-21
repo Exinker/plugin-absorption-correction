@@ -5,11 +5,14 @@ import plugin
 from plugin import Plugin
 from plugin.config import PLUGIN_CONFIG
 from plugin.loggers import *
+from plugin.presentation import QtCorrectionPreview
 from plugin.types import XML
 
 
 LOGGER = logging.getLogger('plugin-absorption-correction')
-PLUGIN = Plugin.create()
+PLUGIN = Plugin.create(
+    correction_preview=QtCorrectionPreview(),
+)
 
 
 def process_xml(config_xml: XML) -> str:

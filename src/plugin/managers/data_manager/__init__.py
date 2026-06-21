@@ -1,7 +1,5 @@
-from .exceptions import DataManagerError
-from .data_manager import DataManager
+from .data_manager import DataSourceManager
 
 __all__ = [
-    DataManager,
-    DataManagerError,
+    DataSourceManager,
 ]

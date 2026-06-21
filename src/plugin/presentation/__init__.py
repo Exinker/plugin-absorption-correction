@@ -1,5 +1,5 @@
-from .app import retrieve_transformer
+from .app import QtCorrectionPreview
 
 __all__ = [
-    retrieve_transformer,
+    QtCorrectionPreview,
 ]

@@ -1,5 +1,5 @@
 from plugin.exceptions import PluginError
 
 
-class CorrectionManagerError(PluginError):
+class CorrectionPipelineError(PluginError):
     pass
