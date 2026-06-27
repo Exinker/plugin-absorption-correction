@@ -23,7 +23,6 @@ from spectrumlab_emulations.emulations import (
 def emulation(
     config,
 ) -> AbsorbedSpectrumEmulation:
-
     return AbsorbedSpectrumEmulation(
         config=AbsorbedSpectrumEmulationConfig(
             device=config.device,
@@ -46,7 +45,6 @@ def emulation(
 
             background_level=config.background_level,
             scattering_ratio=config.scattering_ratio,
-            # info='',
         ),
     )
 
@@ -56,7 +54,6 @@ def concentration_calibrator(
     config,
     emulation: AbsorbedSpectrumEmulation,
 ) -> ConcentrationCalibrator:
-
     concentration_calibrator = ConcentrationCalibrator(
         emulation=emulation,
         config=ConcentrationCalibratorConfig(
@@ -75,89 +72,65 @@ def concentration_calibrator(
         position=config.position,
         concentrations=config.concentrations,
     )
-    concentration_calibrator = concentration_calibrator.run(
+    return concentration_calibrator.run(
         verbose=False,
         show=False,
         write=False,
         random_state=0,
     )
-    return concentration_calibrator
 
 
 def create_test_xml(
     frame: pd.DataFrame,
     column_id: str,
     column_name: str,
-    organization_name: str = 'Test Organization',
-    device_name: str = 'Test Device',
-    user_name: str = 'Test User',
-    analysis_name: str = 'Test Analysis',
 ) -> str:
-
     root = Element('root')
 
-    __titul = SubElement(root, 'titul')
+    titul = SubElement(root, 'titul')
+    SubElement(titul, 'organization').text = 'Test Organization'
+    SubElement(titul, 'device').text = 'Test Device'
+    SubElement(titul, 'user').text = 'Test User'
+    SubElement(titul, 'aname').text = 'Test Analysis'
 
-    __organization = SubElement(__titul, 'organization')
-    __organization.text = organization_name
+    columns = SubElement(root, 'columns')
+    sheet = SubElement(columns, 'sheet')
 
-    __device = SubElement(__titul, 'device')
-    __device.text = device_name
+    column = SubElement(sheet, 'column')
+    column.set('id', column_id)
+    column.set('name', column_name)
+    column.set('type', 'line')
+    column.set('visible', 'yes')
 
-    __user = SubElement(__titul, 'user')
-    __user.text = user_name
-
-    __aname = SubElement(__titul, 'aname')
-    __aname.text = analysis_name
-
-    __columns = SubElement(root, 'columns')
-    __sheet = SubElement(__columns, 'sheet')
-
-    __column = SubElement(__sheet, 'column')
-    __column.set('id', column_id)
-    __column.set('name', column_name)
-    __column.set('type', 'line')
-    __column.set('visible', 'yes')
-
-    __cells = SubElement(__column, 'cells')
+    cells = SubElement(column, 'cells')
     probes = frame.index.get_level_values('probe').unique()
 
-    concentrations = {}
     for probe in probes:
         probe_data = frame.xs(probe, level='probe')
-        concentration = probe_data['concentration'].iloc[0]
-        concentrations[probe] = concentration
-
-        __pc = SubElement(__cells, 'pc')
-        __pc.set('i', str(probe))
-        __pc.set('cm', str(concentration))
+        pc = SubElement(cells, 'pc')
+        pc.set('i', str(probe))
+        pc.set('cm', str(probe_data['concentration'].iloc[0]))
 
     probes_elem = SubElement(root, 'probes')
 
     for probe in probes:
-        __probe = SubElement(probes_elem, 'probe')
-        __probe.set('id', str(probe))
-        __probe.set('name', f'Sample{probe}')
-        __probe.set('visible', 'yes')
+        probe_elem = SubElement(probes_elem, 'probe')
+        probe_elem.set('id', str(probe))
+        probe_elem.set('name', f'Sample{probe}')
+        probe_elem.set('visible', 'yes')
 
         probe_data = frame.xs(probe, level='probe')
-        parallel_indices = probe_data.index
+        for parallel_idx in probe_data.index:
+            spe = SubElement(probe_elem, 'spe')
+            spe.set('name', f'parallel{parallel_idx}')
+            spe.set('disabled', 'no')
 
-        for parallel_idx in parallel_indices:
-            __spe = SubElement(__probe, 'spe')
-            __spe.set('name', f'parallel{parallel_idx}')
-            __spe.set('disabled', 'no')
+            graph = SubElement(SubElement(spe, 'graphs'), 'graph')
+            graph.set('id', column_id)
 
-            __graphs = SubElement(__spe, 'graphs')
-            __graph = SubElement(__graphs, 'graph')
-            __graph.set('id', column_id)
-
-            intensity = probe_data.loc[parallel_idx, 'intensity']
-
-            y_values = np.array([intensity], dtype=np.float32)
-            y_values_b64 = b64encode(y_values.tobytes()).decode('ascii')
-            __yvals = SubElement(__graph, 'yvals')
-            __yvals.text = y_values_b64
+            intensity = np.array([probe_data.loc[parallel_idx, 'intensity']], dtype=np.float32)
+            yvals = SubElement(graph, 'yvals')
+            yvals.text = b64encode(intensity.tobytes()).decode('ascii')
 
     return minidom.parseString(
         tostring(root, encoding='unicode'),
@@ -165,25 +138,30 @@ def create_test_xml(
 
 
 @pytest.fixture(scope='module')
-def filepath(tmp_path_factory) -> Path:
-    tmpdir = tmp_path_factory.mktemp('data')
-
+def atom_filepath(tmp_path_factory) -> Path:
+    tmpdir = tmp_path_factory.mktemp('system-data')
     return tmpdir / 'test.xml'
 
 
-@pytest.fixture(scope='module', autouse=True)
-def setup(
+@pytest.fixture(scope='module')
+def atom_config_xml(
+    atom_filepath: Path,
+    setup_atom_data,
+) -> str:
+    return '<input>{path}</input>'.format(path=atom_filepath)
+
+
+@pytest.fixture(scope='module')
+def setup_atom_data(
     column_id: str,
     column_name: str,
     concentration_calibrator: ConcentrationCalibrator,
-    filepath: Path,
-) -> Path:
-
-    xml = create_test_xml(
-        concentration_calibrator.data,
-        column_id=column_id,
-        column_name=column_name,
+    atom_filepath: Path,
+) -> None:
+    atom_filepath.write_text(
+        create_test_xml(
+            concentration_calibrator.data,
+            column_id=column_id,
+            column_name=column_name,
+        ),
     )
-
-    with open(filepath, 'w') as file:
-        file.write(xml)

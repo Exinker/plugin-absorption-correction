@@ -1,7 +1,12 @@
-from .exceptions import CorrectionManagerError
-from .correction_manager import CorrectionManager
+from .exceptions import CorrectionPipelineError
+from .pipeline import CorrectionPipeline
+from .preview import CorrectionPreview
+from .processor import CorrectionProcessor, CorrectionResult
 
 __all__ = [
-    CorrectionManagerError,
-    CorrectionManager,
+    CorrectionPipelineError,
+    CorrectionPipeline,
+    CorrectionPreview,
+    CorrectionProcessor,
+    CorrectionResult,
 ]

@@ -1,52 +1,88 @@
+import json
 import logging
 import logging.config
+from datetime import datetime, timezone
 
-from plugin.config import PLUGIN_CONFIG
+from plugin import ROOT
+from plugin.configs.logging_config import LoggingConfig
 
 
-def setdefault_logger():
-    config = dict(
-        version=1,
-        disable_existing_loggers=False,
+class JsonRecordFormatter(logging.Formatter):
 
-        formatters=dict(
-            formatter={
-                'datefmt': '%Y-%m-%d %H:%M:%S',
-                'format': '[%(asctime)s.%(msecs)04d] %(levelname)-8s - %(message)s',
+    RECORD_KEYS = {
+        'args', 'created', 'exc_info', 'exc_text', 'filename', 'funcName',
+        'levelname', 'levelno', 'lineno', 'module', 'msecs', 'msg', 'name',
+        'pathname', 'relativeCreated', 'process', 'processName', 'stack_info',
+        'taskName', 'thread', 'threadName',
+    }
+
+    def format(
+        self,
+        record: logging.LogRecord,
+    ) -> str:
+
+        data = dict(
+            timestamp=datetime.fromtimestamp(
+                timestamp=record.created,
+                tz=timezone.utc,
+            ).isoformat(),
+            level=record.levelname,
+            msg=record.getMessage(),
+        )
+        if record.exc_info:
+            data['error'] = self.formatException(record.exc_info)
+
+        extra = dict()
+        for key, value in record.__dict__.items():
+            if key not in self.RECORD_KEYS:
+                extra[key] = value
+
+        return json.dumps(dict(
+            **data,
+            **extra,
+        ), ensure_ascii=False, default=str)
+
+
+def setup_logging(
+    config: LoggingConfig,
+) -> None:
+
+    config = {
+        'version': 1,
+        'disable_existing_loggers': False,
+
+        'formatters': {
+            'formatter': {
+                '()': JsonRecordFormatter,
             },
-        ),
+        },
 
-        handlers=dict(
-            stream_handler={
+        'handlers': {
+            'stream_handler': {
                 'class': 'logging.StreamHandler',
-                'level': logging.DEBUG,
+                'level': config.level.value,
+                'filters': [],
                 'formatter': 'formatter',
             },
-            file_handler={
-                'class': 'logging.FileHandler',
-                'level': PLUGIN_CONFIG.logging_level.value,
-                'filename': '.log',
+            'file_handler': {
+                'class': 'logging.handlers.RotatingFileHandler',
+                'level': config.level.value,
+                'filename': str(ROOT / '.log'),
                 'mode': 'a',
+                'maxBytes': config.file_bytes,
+                'backupCount': config.file_backups,
                 'formatter': 'formatter',
                 'encoding': 'utf-8',
             },
-        ),
+        },
 
-        loggers={
+        'loggers': {
             'plugin-absorption-correction': {
-                'level': PLUGIN_CONFIG.logging_level.value,
-                'handlers': ['file_handler', 'stream_handler'],
-                'propagate': False,
-            },
-            'spectrumlab': {
-                'level': PLUGIN_CONFIG.logging_level.value,
-                'handlers': ['file_handler', 'stream_handler'],
-                'propagate': False,
+                'level': logging.DEBUG,
+                'handlers': ['stream_handler', 'file_handler'],
+                'propagate': True,
             },
         },
-    )
 
+    }
     logging.config.dictConfig(config)
-
-
-setdefault_logger()

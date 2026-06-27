@@ -6,9 +6,9 @@ from collections.abc import Mapping
 import numpy as np
 import pandas as pd
 
-from plugin.config import PLUGIN_CONFIG
+from plugin.configs import PLUGIN_CONFIG
 from plugin.dto import AtomDatum
-from plugin.managers.data_manager.exceptions import ParseTableXMLError
+from plugin.managers.data_source_manager.data_sources.exceptions import ParseTableXMLError
 from plugin.types import XML
 from spectrumlab.types import Array
 
@@ -19,6 +19,7 @@ class AtomTableParser:
 
     @classmethod
     def from_xml(cls, __xml: XML) -> Mapping[str, AtomDatum]:
+        LOGGER.info('Start parsing Atom table')
 
         # lines
         line = []
@@ -33,6 +34,10 @@ class AtomTableParser:
                 nickname=nickname,
             ))
         line = pd.DataFrame(line).set_index('line_id')
+        LOGGER.info(
+            'Visible Atom lines parsed: columns=%d',
+            len(line),
+        )
 
         # concentrations
         concentrations = defaultdict(list)
@@ -100,6 +105,10 @@ class AtomTableParser:
 
                 __bounds = __column.find('bounds')
                 bounds[column_id] = (float(__bounds.attrib['lb']), float(__bounds.attrib['ub']))
+        LOGGER.info(
+            'Saved correction bounds parsed: columns=%d',
+            len(bounds),
+        )
 
         # polynom
         polynom = defaultdict(list)
@@ -112,6 +121,10 @@ class AtomTableParser:
                 __polynom = __column.find('polynom')
                 for __point in __polynom.findall('point'):
                     polynom[column_id].append((float(__point.attrib['x']), float(__point.attrib['y'])))
+        LOGGER.info(
+            'Saved correction polynoms parsed: columns=%d',
+            len(polynom),
+        )
 
         # data
         data = {}
@@ -119,8 +132,8 @@ class AtomTableParser:
             nickname = line.loc[column_id, 'nickname']
 
             frame = pd.DataFrame(datum[column_id]).set_index(['probe_name', 'parallel_name'])
-            if PLUGIN_CONFIG.black_name in frame.index:
-                blank = frame.loc[PLUGIN_CONFIG.black_name, 'intensity'].mean().item()
+            if PLUGIN_CONFIG.blank_name in frame.index:
+                blank = frame.loc[PLUGIN_CONFIG.blank_name, 'intensity'].mean().item()
 
                 frame['intensity'] -= blank
                 frame['value'] -= blank
@@ -132,6 +145,10 @@ class AtomTableParser:
                 bounds=bounds.get(column_id),
                 polynom=polynom.get(column_id),
             )
+        LOGGER.info(
+            'Atom table parsed: columns=%d',
+            len(data),
+        )
         return data
 
 
@@ -143,7 +160,8 @@ def parse_intensity(__graph: XML) -> Array[float]:
     xpath = 'yvals'
 
     try:
-        return numpy_array_from_b64(__graph.find(xpath).text, dtype=np.float32)
+        value = numpy_array_from_b64(__graph.find(xpath).text, dtype=np.float32)
+        return np.array(value, dtype=np.float64)
 
     except Exception:
         LOGGER.error("Parse `intensity` failed. Check xpath: %r", xpath)
@@ -154,8 +172,10 @@ def parse_mask(__graph: XML) -> Array[bool]:
     xpath = 'yvals'
 
     try:
+        index = numpy_array_from_b64(__graph.find('bad').text, dtype=np.int32)
+
         mask = np.full(int(__graph.find(xpath).get('value_array_size')), False)
-        mask[numpy_array_from_b64(__graph.find('bad').text, dtype=np.int32)] = True
+        mask[index] = True
         return mask
 
     except Exception:
