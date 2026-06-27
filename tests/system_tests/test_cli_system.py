@@ -5,7 +5,7 @@ import sys
 
 class FakePlugin:
 
-    def run(self, config_xml: str) -> str:
+    def run(self) -> str:
         return '<columns><column id="1" nickname="Ag 338.289" /></columns>'
 
 
@@ -18,7 +18,7 @@ def test_run_py_prints_process_xml_result(
     monkeypatch.setattr(
         plugin.Plugin,
         'create',
-        classmethod(lambda cls, correction_preview: FakePlugin()),
+        classmethod(lambda cls, data_source, preview: FakePlugin()),
     )
     monkeypatch.setattr(
         sys,

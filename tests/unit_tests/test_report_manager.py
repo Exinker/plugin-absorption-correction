@@ -11,4 +11,4 @@ def test_default_report_is_valid_atom_error_xml():
     messages = root.findall('message')
     assert len(messages) == 2
     assert messages[0].get('text') == 'Absorption correction failed!'
-    assert messages[1].get('text') == 'Open `${ATOM_PATH}/Data/.log` to more information.'
+    assert messages[1].get('text') == 'Open `${ATOM_PATH}/Data/.log` to more information'

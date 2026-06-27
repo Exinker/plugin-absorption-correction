@@ -29,29 +29,35 @@ class CorrectionProcessor:
         bounds: tuple[R, R] | None,
     ) -> CorrectionResult:
         LOGGER.info(
-            'Start correction processing: column=%s, rows=%d, bounds=%r',
-            column_id,
-            len(frame),
-            bounds,
+            'Start correction processing',
+            extra=dict(
+                column_id=column_id,
+                bounds=bounds,
+            ),
         )
 
         data = process_frame(frame)
         if bounds is None:
             bounds = estimate_bounds(data)
             LOGGER.info(
-                'Correction bounds estimated: column=%s, bounds=%r',
-                column_id,
-                bounds,
+                'Correction bounds estimated',
+                extra=dict(
+                    column_id=column_id,
+                    bounds=bounds,
+                ),
             )
         else:
             LOGGER.info(
-                'Use saved correction bounds: column=%s, bounds=%r',
-                column_id,
-                bounds,
+                'Use exists correction bounds',
+                extra=dict(
+                    column_id=column_id,
+                    bounds=bounds,
+                ),
             )
 
         transformer = RegressionIntensityTransformer.create(
-            data=data,
+            intensity=data['intensity'].to_numpy(),
+            concentration=data['concentration'].to_numpy(),
             bounds=bounds,
         )
         processed_data = process_data(
@@ -60,9 +66,10 @@ class CorrectionProcessor:
         )
 
         LOGGER.info(
-            'Correction processing finished: column=%s, rows=%d',
-            column_id,
-            len(processed_data),
+            'Correction processing finished successfully',
+            extra=dict(
+                column_id=column_id,
+            ),
         )
 
         return CorrectionResult(

@@ -38,10 +38,3 @@ def process_xml(config_xml: str) -> str:
 
     except subprocess.CalledProcessError:
         raise
-
-
-if __name__ == '__main__':
-    result = process_xml(
-        config_xml=r'<input>C:\Atom x64 3.3 (2025.11.14)\Temp\py_table.xml</input>',
-    )
-    print(result)

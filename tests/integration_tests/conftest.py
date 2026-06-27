@@ -154,9 +154,8 @@ def create_test_xml(
 
             intensity = probe_data.loc[parallel_idx, 'intensity']
 
-            y_values = np.array([intensity])
-            y_values_float32 = y_values.astype(np.float32)
-            y_values_b64 = b64encode(y_values_float32.tobytes()).decode('ascii')
+            y_values = np.array([intensity], dtype=np.float32)
+            y_values_b64 = b64encode(y_values.tobytes()).decode('ascii')
             __yvals = SubElement(__graph, 'yvals')
             __yvals.text = y_values_b64
 

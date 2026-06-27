@@ -30,8 +30,10 @@ class QtCorrectionPreview(CorrectionPreview):
         )
         for column_id, datum in data.items():
             LOGGER.debug(
-                'Update window for column %s',
-                column_id,
+                'Update window',
+                extra=dict(
+                    column_id=column_id,
+                ),
             )
             window.update(
                 column_id=column_id,

@@ -2,14 +2,14 @@ import logging
 import xml.etree.ElementTree as ElementTree
 
 from plugin.dto import AtomData, AtomFilepath
-from plugin.managers.data_manager.data_sources.exceptions import (
+from plugin.managers.data_source_manager.data_sources.exceptions import (
     LoadDataXMLError,
     ParseDataXMLError,
     ParseMetaXMLError,
     ParseTableXMLError,
 )
-from plugin.managers.data_manager.data_sources.xml_data_source.parsers.atom_meta_parser import AtomMetaParser
-from plugin.managers.data_manager.data_sources.xml_data_source.parsers.atom_table_parser import AtomTableParser
+from plugin.managers.data_source_manager.data_sources.xml_data_source.parsers.atom_meta_parser import AtomMetaParser
+from plugin.managers.data_source_manager.data_sources.xml_data_source.parsers.atom_table_parser import AtomTableParser
 from plugin.types import XML
 
 LOGGER = logging.getLogger('plugin-absorption-correction')

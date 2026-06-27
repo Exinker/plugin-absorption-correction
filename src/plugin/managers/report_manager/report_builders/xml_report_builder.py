@@ -1,12 +1,14 @@
 import logging
+import math
 import xml.etree.ElementTree as ElementTree
 from collections.abc import Mapping, Sequence
 from xml.dom import minidom
 
-from plugin.dto import AtomDatum
 from spectrumlab.peaks.analyte_peaks.intensity.transformers import (
     RegressionIntensityTransformer,
 )
+
+from plugin.dto import AtomDatum
 
 
 LOGGER = logging.getLogger('plugin-absorption-correction')
@@ -20,16 +22,20 @@ class XMLReportBuilder:
         transformers: Mapping[str, RegressionIntensityTransformer],
     ) -> str:
         LOGGER.info(
-            'Start XML report building: columns=%d',
-            len(data),
+            'Start report building with XML',
+            extra=dict(
+                columns=len(data),
+            ),
         )
 
         results = []
         for column_id, datum in data.items():
             LOGGER.debug(
-                'Build XML report column: column=%s, nickname=%r',
-                column_id,
-                datum.nickname,
+                'Build XML report column',
+                extra=dict(
+                    column_id=column_id,
+                    nickname=datum.nickname,
+                ),
             )
 
             results.append(dict(
@@ -46,9 +52,10 @@ class XMLReportBuilder:
 
         report = wrap(results)
         LOGGER.info(
-            'XML report built: columns=%d, size=%d',
-            len(results),
-            len(report),
+            'XML report built successfully',
+            extra=dict(
+                results=len(results),
+            ),
         )
         return report
 
@@ -72,25 +79,30 @@ class XMLReportBuilder:
 
         frame = datum.frame.copy()
         frame = frame.dropna(subset=['concentration'])
-        frame = frame.groupby(level=0, sort=False).mean()
-        frame['intensity_hat'] = transformer.apply(frame['intensity'])
+        frame = frame.groupby(level=0, sort=False).mean(numeric_only=True)
+        frame['intensity_hat'] = transformer.predict(frame['intensity'])
 
         data = []
         for index in frame.index:
+            x = float(frame.loc[index, 'intensity'].item())
+            y = float(frame.loc[index, 'intensity_hat'].item())
+            if not (math.isfinite(x) and math.isfinite(y)):
+                continue
+
             data.append({
-                'x': str(frame.loc[index, 'intensity'].item()),
-                'y': str(frame.loc[index, 'intensity_hat'].item()),
+                'x': str(x),
+                'y': str(y),
             })
         return tuple(data)
 
     @classmethod
     def default(cls) -> str:
-        LOGGER.info('Build default XML report.')
+        LOGGER.info('Build default XML report')
 
         root = ElementTree.Element('columns')
 
         ElementTree.SubElement(root, 'message', text='Absorption correction failed!')
-        ElementTree.SubElement(root, 'message', text='Open `${ATOM_PATH}/Data/.log` to more information.')
+        ElementTree.SubElement(root, 'message', text='Open `${ATOM_PATH}/Data/.log` to more information')
 
         reparsed = minidom.parseString(
             string=ElementTree.tostring(root, encoding='utf-8'),

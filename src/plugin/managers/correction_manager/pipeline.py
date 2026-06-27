@@ -20,14 +20,14 @@ class CorrectionPipeline:
 
     def __init__(
         self,
-        report_manager: ReportManager,
         preview: CorrectionPreview,
         processor: CorrectionProcessor,
+        report_manager: ReportManager,
     ) -> None:
 
-        self.report_manager = report_manager
         self.preview = preview
         self.processor = processor
+        self.report_manager = report_manager
 
     def retrieve(
         self,
@@ -36,7 +36,7 @@ class CorrectionPipeline:
         started_at = time.perf_counter()
 
         LOGGER.debug(
-            'Start to retrieve transformers...',
+            'Start to retrieve correction transformers...',
         )
 
         transformers = {}
@@ -47,37 +47,30 @@ class CorrectionPipeline:
                 dump_callback=partial(self.dump, data=data, transformers=transformers),
             )
 
-        except Exception:
+        except Exception as error:
             LOGGER.error(
-                'Time elapsed for retrieving: {elapsed:.4f}, s'.format(
-                    elapsed=time.perf_counter() - started_at,
+                'Failed to show preview',
+                extra=dict(
+                    error=error,
+                    time_elapsed=time.perf_counter() - started_at,
                 ),
             )
 
         else:
             LOGGER.info(
-                'Correction transformers retrieved: columns=%d',
-                len(transformers),
+                'Correction transformers retrieved successfully',
+                extra=dict(
+                    time_elapsed=time.perf_counter() - started_at,
+                ),
             )
             return transformers
-
-        finally:
-            if LOGGER.isEnabledFor(logging.INFO):
-                LOGGER.info(
-                    'Time elapsed for retrieving: {elapsed:.4f}, s'.format(
-                        elapsed=time.perf_counter() - started_at,
-                    ),
-                )
 
     def dump(
         self,
         data: Mapping[str, AtomDatum],
         transformers: Mapping[str, RegressionIntensityTransformer],
     ) -> None:
-        LOGGER.info(
-            'Dump correction report from pipeline: columns=%d',
-            len(transformers),
-        )
+        LOGGER.info('Dump correction report from pipeline')
 
         report = self.report_manager.build(
             data=data,
@@ -96,7 +89,10 @@ class CorrectionPipeline:
     ) -> tuple[tuple[R, R], Frame]:
 
         LOGGER.info(
-            'Retrieve transformer for column %s', column_id,
+            'Retrieve transformer',
+            extra=dict(
+                column_id=column_id,
+            ),
         )
 
         result = self.processor.process(
@@ -108,10 +104,11 @@ class CorrectionPipeline:
         transformers[column_id] = result.transformer
 
         LOGGER.info(
-            'Transformer retrieved for column %s: bounds=%r, rows=%d',
-            column_id,
-            result.bounds,
-            len(result.frame),
+            'Transformer retrieved successfully',
+            extra=dict(
+                column_id=column_id,
+                bounds=result.bounds,
+            ),
         )
 
         return result.bounds, result.frame

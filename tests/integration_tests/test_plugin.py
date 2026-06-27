@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from plugin import Plugin
+from plugin.managers.data_source_manager.data_sources import XMLDataSource
 from tests.fakes import HeadlessCorrectionPreview
 
 
@@ -14,11 +15,12 @@ def result(
     filepath: Path,
 ) -> str | None:
     plugin = Plugin.create(
-        correction_preview=HeadlessCorrectionPreview(),
+        data_source=XMLDataSource(xml='<input>{path}</input>'.format(
+            path=filepath,
+        )),
+        preview=HeadlessCorrectionPreview(),
     )
-    return plugin.run('<input>{path}</input>'.format(
-        path=filepath,
-    ))
+    return plugin.run()
 
 
 def test_transformer(

@@ -1,15 +1,13 @@
 from plugin.dto import AtomData, AtomFilepath, AtomMeta
-from plugin.managers.data_manager import DataSourceManager
+from plugin.managers.data_source_manager import DataSourceManager
 
 
 class FakeDataSource:
 
     def __init__(self, data: AtomData) -> None:
         self.data = data
-        self.xml = None
 
-    def load(self, xml=None) -> AtomData:
-        self.xml = xml
+    def load(self) -> AtomData:
         return self.data
 
 
@@ -27,7 +25,6 @@ def test_data_source_manager_delegates_parse():
     data_source = FakeDataSource(data=atom_data)
     manager = DataSourceManager(data_source=data_source)
 
-    result = manager.load(xml='<input>data.xml</input>')
+    result = manager.load()
 
     assert result is atom_data
-    assert data_source.xml == '<input>data.xml</input>'

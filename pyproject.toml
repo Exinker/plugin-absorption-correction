@@ -16,6 +16,7 @@ maintainers = [
 ]
 license = {text = "MIT License"}
 dependencies = [
+    "scipy<1.18",
     "spectrumapp",
     "spectrumlab",
 ]
@@ -57,7 +58,12 @@ where = ["src"]
 [tool.setuptools.package-data]
 "*" = ["*.csv", "*.md", "*.txt", "*.xml"]
 
+[tool.uv]
+override-dependencies = [
+    "spectrumlab @ git+https://github.com/Exinker/spectrumlab"
+]
+
 [tool.uv.sources]
 spectrumapp = { git = "https://github.com/Exinker/spectrumapp", tag = "1.2.0f" }
-spectrumlab = { git = "https://github.com/Exinker/spectrumlab", tag = "0.9.3a" }
-spectrumlab_emulations = { git = "https://github.com/Exinker/spectrumlab-emulations", tag = "0.1.3a" }
+spectrumlab = { git = "https://github.com/Exinker/spectrumlab", tag = "0.9.3c" }
+spectrumlab_emulations = { git = "ssh://git@github.com/Exinker/spectrumlab-emulations.git", tag = "0.1.3a" }

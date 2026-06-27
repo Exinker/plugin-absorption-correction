@@ -2,8 +2,7 @@ import logging
 import time
 
 from plugin.dto import AtomData
-from plugin.managers.data_manager.data_sources import DataSource
-from plugin.types import XML
+from plugin.managers.data_source_manager.data_sources import DataSource
 
 
 LOGGER = logging.getLogger('plugin-absorption-correction')
@@ -17,21 +16,21 @@ class DataSourceManager:
     ) -> None:
         self.data_source = data_source
 
-    def load(self, xml: XML | None = None) -> AtomData:
+    def load(self) -> AtomData:
         started_at = time.perf_counter()
 
         LOGGER.info(
-            'Start loading atom data: data_source=%s',
+            'Start loading data with data source %s',
             self.data_source.__class__.__name__,
         )
 
-        atom_data = self.data_source.load(xml=xml)
-
+        atom_data = self.data_source.load()
         LOGGER.info(
-            'Atom data loaded: filepath=%r, columns=%d, elapsed=%.4f, s',
-            atom_data.filepath,
-            len(atom_data.data),
-            time.perf_counter() - started_at,
+            'Atom data loaded successfully',
+            extra=dict(
+                filepath=atom_data.filepath,
+                columns=len(atom_data.data),
+                time_elapsed=time.perf_counter() - started_at,
+            ),
         )
-
         return atom_data

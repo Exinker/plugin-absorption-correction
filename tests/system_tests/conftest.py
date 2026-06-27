@@ -128,9 +128,9 @@ def create_test_xml(
             graph = SubElement(SubElement(spe, 'graphs'), 'graph')
             graph.set('id', column_id)
 
-            intensity = np.array([probe_data.loc[parallel_idx, 'intensity']])
+            intensity = np.array([probe_data.loc[parallel_idx, 'intensity']], dtype=np.float32)
             yvals = SubElement(graph, 'yvals')
-            yvals.text = b64encode(intensity.astype(np.float32).tobytes()).decode('ascii')
+            yvals.text = b64encode(intensity.tobytes()).decode('ascii')
 
     return minidom.parseString(
         tostring(root, encoding='unicode'),

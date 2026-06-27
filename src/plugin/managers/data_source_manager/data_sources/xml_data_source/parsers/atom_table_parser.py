@@ -6,9 +6,9 @@ from collections.abc import Mapping
 import numpy as np
 import pandas as pd
 
-from plugin.config import PLUGIN_CONFIG
+from plugin.configs import PLUGIN_CONFIG
 from plugin.dto import AtomDatum
-from plugin.managers.data_manager.data_sources.exceptions import ParseTableXMLError
+from plugin.managers.data_source_manager.data_sources.exceptions import ParseTableXMLError
 from plugin.types import XML
 from spectrumlab.types import Array
 
@@ -19,7 +19,7 @@ class AtomTableParser:
 
     @classmethod
     def from_xml(cls, __xml: XML) -> Mapping[str, AtomDatum]:
-        LOGGER.info('Start parsing Atom table.')
+        LOGGER.info('Start parsing Atom table')
 
         # lines
         line = []
@@ -132,8 +132,8 @@ class AtomTableParser:
             nickname = line.loc[column_id, 'nickname']
 
             frame = pd.DataFrame(datum[column_id]).set_index(['probe_name', 'parallel_name'])
-            if PLUGIN_CONFIG.black_name in frame.index:
-                blank = frame.loc[PLUGIN_CONFIG.black_name, 'intensity'].mean().item()
+            if PLUGIN_CONFIG.blank_name in frame.index:
+                blank = frame.loc[PLUGIN_CONFIG.blank_name, 'intensity'].mean().item()
 
                 frame['intensity'] -= blank
                 frame['value'] -= blank
@@ -160,7 +160,8 @@ def parse_intensity(__graph: XML) -> Array[float]:
     xpath = 'yvals'
 
     try:
-        return numpy_array_from_b64(__graph.find(xpath).text, dtype=np.float32)
+        value = numpy_array_from_b64(__graph.find(xpath).text, dtype=np.float32)
+        return np.array(value, dtype=np.float64)
 
     except Exception:
         LOGGER.error("Parse `intensity` failed. Check xpath: %r", xpath)
@@ -171,8 +172,10 @@ def parse_mask(__graph: XML) -> Array[bool]:
     xpath = 'yvals'
 
     try:
+        index = numpy_array_from_b64(__graph.find('bad').text, dtype=np.int32)
+
         mask = np.full(int(__graph.find(xpath).get('value_array_size')), False)
-        mask[numpy_array_from_b64(__graph.find('bad').text, dtype=np.int32)] = True
+        mask[index] = True
         return mask
 
     except Exception:

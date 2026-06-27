@@ -22,7 +22,12 @@ def exception_wrapper(func):
             result = func(*args, **kwargs)
 
         except Exception as error:
-            LOGGER.warning('Failed to retrieve transformer!')
+            LOGGER.warning(
+                'Failed to retrieve transformer!',
+                extra=dict(
+                    error=error,
+                )
+            )
             raise get_initial_exception(error)
 
         else:

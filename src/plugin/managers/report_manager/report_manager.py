@@ -2,7 +2,6 @@ import logging
 import time
 from collections.abc import Mapping
 
-from plugin.config import PluginConfig
 from plugin.dto import AtomDatum
 from plugin.managers.report_manager.report_builders import ReportBuilder, XMLReportBuilder
 from spectrumlab.peaks.analyte_peaks.intensity.transformers import (
@@ -17,11 +16,9 @@ class ReportManager:
 
     def __init__(
         self,
-        plugin_config: PluginConfig,
         report_builder: ReportBuilder,
     ) -> None:
 
-        self.plugin_config = plugin_config
         self.report_builder = report_builder
 
     def build(
@@ -33,10 +30,11 @@ class ReportManager:
         started_at = time.perf_counter()
 
         LOGGER.info(
-            'Start report building: report_builder=%s, columns=%d, dump=%s',
+            'Start report building with %s',
             self.report_builder.__class__.__name__,
-            len(data),
-            dump,
+            extra=dict(
+                dump=dump,
+            ),
         )
 
         report = self.report_builder.build(
@@ -49,17 +47,13 @@ class ReportManager:
                 report=report,
             )
 
-        LOGGER.info(
-            'Report built: size=%d, elapsed=%.4f, s',
-            len(report),
-            time.perf_counter() - started_at,
-        )
+        LOGGER.info('Report built successfully')
 
         return report
 
     @classmethod
     def default(cls) -> str:
-        LOGGER.info('Build default error report.')
+        LOGGER.info('Build default error report')
         return XMLReportBuilder.default()
 
     def dump(
@@ -70,9 +64,10 @@ class ReportManager:
 
         filepath = f'{filename}.xml'
         LOGGER.info(
-            'Dump report: filepath=%r, size=%d',
-            filepath,
-            len(report),
+            'Dump report',
+            extra=dict(
+                filepath=filepath,
+            ),
         )
         with open(filepath, 'w') as file:
             file.write(report)
