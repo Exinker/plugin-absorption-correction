@@ -77,7 +77,7 @@ class AtomTableParser:
 
                         try:
                             value = parse_intensity(__graph)
-                            if __graph.find('bad'):
+                            if __graph.find('bad') is not None:
                                 mask = parse_mask(__graph)
                                 value = np.where(~mask, value, np.nan)
 
@@ -99,7 +99,7 @@ class AtomTableParser:
         bounds = {}
 
         __plugin = __xml.find('plugin-absorption-correction')
-        if __plugin:
+        if __plugin is not None:
             for __column in __plugin.findall('column'):
                 column_id = __column.attrib['id']
 
@@ -114,7 +114,7 @@ class AtomTableParser:
         polynom = defaultdict(list)
 
         __plugin = __xml.find('plugin-absorption-correction')
-        if __plugin:
+        if __plugin is not None:
             for __column in __plugin.findall('column'):
                 column_id = __column.attrib['id']
 
