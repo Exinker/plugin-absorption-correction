@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 import plugin
 from plugin import Plugin
-from plugin.configs import (
+from plugin.config import (
     LOGGING_CONFIG,
     PLUGIN_CONFIG,
 )

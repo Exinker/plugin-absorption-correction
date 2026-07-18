@@ -6,7 +6,7 @@ from collections.abc import Mapping
 import numpy as np
 import pandas as pd
 
-from plugin.configs import PLUGIN_CONFIG
+from plugin.config import PLUGIN_CONFIG
 from plugin.dto import AtomDatum
 from plugin.managers.data_source_manager.data_sources.exceptions import ParseTableXMLError
 from plugin.types import XML
@@ -76,7 +76,7 @@ class AtomTableParser:
                     if column_id in line.index:
 
                         try:
-                            value = parse_intensity(__graph)
+                            value = parse_value(__graph)
                             if __graph.find('bad') is not None:
                                 mask = parse_mask(__graph)
                                 value = np.where(~mask, value, np.nan)
@@ -156,7 +156,7 @@ def numpy_array_from_b64(buffer: str, dtype: type) -> Array[float]:
     return np.frombuffer(b64decode(buffer.strip()), dtype=dtype)
 
 
-def parse_intensity(__graph: XML) -> Array[float]:
+def parse_value(__graph: XML) -> Array[float]:
     xpath = 'yvals'
 
     try:

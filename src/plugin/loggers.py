@@ -4,7 +4,7 @@ import logging.config
 from datetime import datetime, timezone
 
 from plugin import ROOT
-from plugin.configs.logging_config import LoggingConfig
+from plugin.config.logging_config import LoggingConfig
 
 
 class JsonRecordFormatter(logging.Formatter):

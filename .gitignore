@@ -1,5 +1,6 @@
 .git/
 .mypy_cache/
+.opencode/
 .pytest_cache/
 .venv/
 .venv.vm/
@@ -12,6 +13,7 @@ build/
 data/
 dist/
 dumps/
+experiments/
 htmlcov/
 img/
 spd/

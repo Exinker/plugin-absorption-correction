@@ -15,7 +15,7 @@ def process_data(
         {
             'concentration': __data['concentration'],
             'intensity': __data['intensity'],
-            'intensity_true': transformer.estimate_intensity(__data['concentration']),
+            'intensity_true': transformer.estimate_intensity_true(__data['concentration']),
             'intensity_linearized': transformer.predict(__data['intensity']),
         },
         index=__data.index,

@@ -28,3 +28,7 @@
 ### ENV
 Преременные окружения плагина:
 - `LOGGING_LEVEL: 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR' = 'INFO'` - уровень логгирования;
+- `BLANK_NAME=''` - имя бланка;
+- `METHOD=amplitude` - способ построения корректирующего полинома (`amplitude` или `integral`);
+- `ALPHA=1e-4` - величина регуляризации (при `METHOD=integral`);
+- `N=10` - количество точек L1 интерполяции (при `METHOD=integral`);

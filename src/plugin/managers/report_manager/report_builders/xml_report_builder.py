@@ -63,7 +63,7 @@ class XMLReportBuilder:
         self,
         transformer: RegressionIntensityTransformer,
     ) -> Mapping[str, str]:
-        lb, ub = transformer.bounds
+        lb, ub = transformer.kernel.bounds
 
         bounds = {
             'lb': str(lb),
