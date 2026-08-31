@@ -3,6 +3,11 @@ import time
 from collections.abc import Mapping
 from functools import partial
 
+from spectrumlab.peaks.analyte_peaks.intensity.transformers import (
+    RegressionIntensityTransformer,
+)
+from spectrumlab.types import Frame, R
+
 from plugin.dto import AtomDatum
 from plugin.managers.correction_manager.preview import CorrectionPreview
 from plugin.managers.correction_manager.processor import (
@@ -10,11 +15,6 @@ from plugin.managers.correction_manager.processor import (
     CorrectionResult,
 )
 from plugin.managers.report_manager import ReportManager
-from spectrumlab.peaks.analyte_peaks.intensity.transformers import (
-    RegressionIntensityTransformer,
-)
-from spectrumlab.types import Frame, R
-
 
 LOGGER = logging.getLogger('plugin-absorption-correction')
 

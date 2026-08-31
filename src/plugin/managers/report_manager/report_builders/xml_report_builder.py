@@ -4,12 +4,9 @@ import xml.etree.ElementTree as ElementTree
 from collections.abc import Mapping, Sequence
 from xml.dom import minidom
 
-from spectrumlab.peaks.analyte_peaks.intensity.transformers import (
-    RegressionIntensityTransformer,
-)
+from spectrumlab.peaks.analyte_peaks.intensity.transformers import RegressionIntensityTransformer
 
 from plugin.dto import AtomDatum
-
 
 LOGGER = logging.getLogger('plugin-absorption-correction')
 

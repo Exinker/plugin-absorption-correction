@@ -1,8 +1,9 @@
 from collections.abc import Callable, Mapping
 from typing import Protocol
 
-from plugin.dto import AtomDatum
 from spectrumlab.types import Frame, R
+
+from plugin.dto import AtomDatum
 
 
 class CorrectionPreview(Protocol):

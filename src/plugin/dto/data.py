@@ -1,9 +1,10 @@
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
+from spectrumlab.types import Frame, R
+
 from plugin.dto.filepath import AtomFilepath
 from plugin.dto.meta import AtomMeta
-from spectrumlab.types import Frame, R
 
 
 @dataclass

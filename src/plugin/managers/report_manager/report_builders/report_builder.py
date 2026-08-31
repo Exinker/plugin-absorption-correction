@@ -1,10 +1,9 @@
 from collections.abc import Mapping
 from typing import Protocol
 
+from spectrumlab.peaks.analyte_peaks.intensity.transformers import RegressionIntensityTransformer
+
 from plugin.dto import AtomDatum
-from spectrumlab.peaks.analyte_peaks.intensity.transformers import (
-    RegressionIntensityTransformer,
-)
 
 
 class ReportBuilder(Protocol):

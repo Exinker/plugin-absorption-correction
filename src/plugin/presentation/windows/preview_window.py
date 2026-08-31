@@ -11,9 +11,6 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from matplotlib.backend_bases import KeyEvent, MouseEvent, PickEvent
 from matplotlib.figure import Figure
 
-import plugin
-from plugin.dto import AtomDatum
-from plugin.managers.correction_manager.processor import CorrectionResult
 from spectrumapp.configs import TELEGRAM_CONFIG
 from spectrumapp.helpers import find_tab, find_window, getdefault_object_name
 from spectrumapp.types import Lims
@@ -26,6 +23,9 @@ from spectrumlab.picture.alphas import ALPHA
 from spectrumlab.picture.colors import COLOR
 from spectrumlab.types import Frame, R
 
+import plugin
+from plugin.dto import AtomDatum
+from plugin.managers.correction_manager.processor import CorrectionResult
 
 Index = NewType('Index', str)
 

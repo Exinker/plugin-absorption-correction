@@ -6,11 +6,12 @@ from collections.abc import Mapping
 import numpy as np
 import pandas as pd
 
+from spectrumlab.types import Array
+
 from plugin.config import PLUGIN_CONFIG
 from plugin.dto import AtomDatum
 from plugin.managers.data_source_manager.data_sources.exceptions import ParseTableXMLError
 from plugin.types import XML
-from spectrumlab.types import Array
 
 LOGGER = logging.getLogger('plugin-absorption-correction')
 

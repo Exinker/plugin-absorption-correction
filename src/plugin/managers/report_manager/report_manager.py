@@ -2,12 +2,10 @@ import logging
 import time
 from collections.abc import Mapping
 
+from spectrumlab.peaks.analyte_peaks.intensity.transformers import RegressionIntensityTransformer
+
 from plugin.dto import AtomDatum
 from plugin.managers.report_manager.report_builders import ReportBuilder, XMLReportBuilder
-from spectrumlab.peaks.analyte_peaks.intensity.transformers import (
-    RegressionIntensityTransformer,
-)
-
 
 LOGGER = logging.getLogger('plugin-absorption-correction')
 

@@ -4,11 +4,11 @@ from typing import Callable
 
 from PySide6 import QtWidgets
 
+from spectrumlab.types import Frame, R
+
 from plugin.dto import AtomDatum
 from plugin.managers.correction_manager import CorrectionPreview
 from plugin.presentation.windows import PreviewWindow
-from spectrumlab.types import Frame, R
-
 
 LOGGER = logging.getLogger('plugin-absorption-correction')
 

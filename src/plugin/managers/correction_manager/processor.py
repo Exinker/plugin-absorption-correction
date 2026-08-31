@@ -13,7 +13,6 @@ from spectrumlab.types import Frame, R
 from plugin.config import PLUGIN_CONFIG
 from plugin.managers.correction_manager.core import process_data
 
-
 LOGGER = logging.getLogger('plugin-absorption-correction')
 
 

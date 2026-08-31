@@ -4,7 +4,6 @@ import time
 from plugin.dto import AtomData
 from plugin.managers.data_source_manager.data_sources import DataSource
 
-
 LOGGER = logging.getLogger('plugin-absorption-correction')
 
 

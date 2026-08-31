@@ -1,6 +1,5 @@
 import logging
 import time
-from pathlib import Path
 
 from plugin.dto import AtomData
 from plugin.managers.data_source_manager.data_sources.exceptions import (
@@ -14,7 +13,6 @@ from plugin.managers.data_source_manager.data_sources.xml_data_source.parsers im
     FilepathParser,
 )
 from plugin.types import XML
-
 
 LOGGER = logging.getLogger('plugin-absorption-correction')
 
