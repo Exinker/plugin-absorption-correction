@@ -19,6 +19,7 @@ LOGGER = logging.getLogger('plugin-absorption-correction')
 
 @dataclass(frozen=True)
 class CorrectionResult:
+
     bounds: tuple[R, R]
     transformer: RegressionIntensityTransformer
     frame: Frame
@@ -50,6 +51,7 @@ class CorrectionProcessor:
                     bounds=bounds,
                 ),
             )
+
         else:
             LOGGER.info(
                 'Use exists correction bounds',
@@ -60,6 +62,7 @@ class CorrectionProcessor:
             )
 
         match PLUGIN_CONFIG.method:
+
             case 'amplitude':
                 transformer = RegressionIntensityTransformer(
                     kernel=AmplitudeKernel(
@@ -68,6 +71,7 @@ class CorrectionProcessor:
                         bounds=bounds,
                     ),
                 )
+
             case 'integral':
                 transformer = RegressionIntensityTransformer(
                     kernel=IntegralKernel(
@@ -79,6 +83,7 @@ class CorrectionProcessor:
                         n=PLUGIN_CONFIG.n,
                     ),
                 )
+
             case _:
                 NotImplementedError(f'Method {PLUGIN_CONFIG.method} not supported yet!')
 

@@ -38,17 +38,18 @@ class XMLReportBuilder:
                 ),
             )
 
-            results.append(dict(
-                id=column_id,
-                nickname=datum.nickname,
-                bounds=self._build_bounds(
-                    transformer=transformers[column_id],
-                ),
-                polynom=self._build_polynom(
-                    datum=datum,
-                    transformer=transformers[column_id],
-                ),
-            ))
+            if transformers[column_id] is not None:
+                results.append(dict(
+                    id=column_id,
+                    nickname=datum.nickname,
+                    bounds=self._build_bounds(
+                        transformer=transformers[column_id],
+                    ),
+                    polynom=self._build_polynom(
+                        datum=datum,
+                        transformer=transformers[column_id],
+                    ),
+                ))
 
         report = wrap(results)
         LOGGER.info(

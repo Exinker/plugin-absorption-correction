@@ -5,7 +5,10 @@ from functools import partial
 
 from plugin.dto import AtomDatum
 from plugin.managers.correction_manager.preview import CorrectionPreview
-from plugin.managers.correction_manager.processor import CorrectionProcessor
+from plugin.managers.correction_manager.processor import (
+    CorrectionProcessor,
+    CorrectionResult,
+)
 from plugin.managers.report_manager import ReportManager
 from spectrumlab.peaks.analyte_peaks.intensity.transformers import (
     RegressionIntensityTransformer,
@@ -86,7 +89,7 @@ class CorrectionPipeline:
         frame: Frame,
         bounds: tuple[R, R] | None,
         transformers: dict[str, RegressionIntensityTransformer],
-    ) -> tuple[tuple[R, R], Frame]:
+    ) -> CorrectionResult | None:
 
         LOGGER.info(
             'Retrieve transformer',
@@ -95,13 +98,24 @@ class CorrectionPipeline:
             ),
         )
 
-        result = self.processor.process(
-            column_id=column_id,
-            frame=frame,
-            bounds=bounds,
-        )
+        try:
+            result = self.processor.process(
+                column_id=column_id,
+                frame=frame,
+                bounds=bounds,
+            )
 
-        transformers[column_id] = result.transformer
+        except Exception as error:
+            LOGGER.warning(
+                'Failed to retrieve transformer',
+                extra=dict(
+                    column_id=column_id,
+                    error=error,
+                ),
+            )
+
+            transformers[column_id] = None
+            return None
 
         LOGGER.info(
             'Transformer retrieved successfully',
@@ -111,4 +125,5 @@ class CorrectionPipeline:
             ),
         )
 
-        return result.bounds, result.frame
+        transformers[column_id] = result.transformer
+        return result

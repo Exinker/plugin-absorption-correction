@@ -13,6 +13,7 @@ from matplotlib.figure import Figure
 
 import plugin
 from plugin.dto import AtomDatum
+from plugin.managers.correction_manager.processor import CorrectionResult
 from spectrumapp.configs import TELEGRAM_CONFIG
 from spectrumapp.helpers import find_tab, find_window, getdefault_object_name
 from spectrumapp.types import Lims
@@ -672,7 +673,7 @@ class PreviewWindow(QtWidgets.QWidget):
         self,
         *args,
         data: Mapping[str, AtomDatum],
-        update_callback: Callable[[tuple[R, R], Frame], Frame],
+        update_callback: Callable[[tuple[R, R], Frame], CorrectionResult],
         dump_callback: Callable[[], None],
         flags: Mapping[QtCore.Qt.WindowType, bool] | None = None,
         **kwargs,
@@ -801,17 +802,18 @@ class PreviewWindow(QtWidgets.QWidget):
         bounds: tuple[R, R] | None,
     ) -> None:
         datum = self._data[column_id]
-        bounds, frame = self._update_callback(
+        result = self._update_callback(
             column_id=column_id,
             frame=datum.frame,
             bounds=bounds,
         )
 
-        widget = find_tab(self.content_widget, text=datum.nickname)
-        widget.update(
-            frame=frame,
-            bounds=bounds,
-        )
+        if result is not None:
+            widget = find_tab(self.content_widget, text=datum.nickname)
+            widget.update(
+                frame=result.frame,
+                bounds=result.bounds,
+            )
 
     def closeEvent(self, event):  # noqa: N802
 
