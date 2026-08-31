@@ -4,6 +4,8 @@ import xml.etree.ElementTree as ElementTree
 from collections.abc import Mapping, Sequence
 from xml.dom import minidom
 
+import numpy as np
+
 from spectrumlab.peaks.analyte_peaks.intensity.transformers import RegressionIntensityTransformer
 
 from plugin.dto import AtomDatum
@@ -19,7 +21,7 @@ class XMLReportBuilder:
         transformers: Mapping[str, RegressionIntensityTransformer],
     ) -> str:
         LOGGER.info(
-            'Start report building with XML',
+            'Start building XML report',
             extra=dict(
                 columns=len(data),
             ),
@@ -27,15 +29,24 @@ class XMLReportBuilder:
 
         results = []
         for column_id, datum in data.items():
-            LOGGER.debug(
-                'Build XML report column',
-                extra=dict(
-                    column_id=column_id,
-                    nickname=datum.nickname,
-                ),
-            )
 
-            if transformers[column_id] is not None:
+            if transformers[column_id] is None:
+                LOGGER.debug(
+                    'Build XML report: column skiped',
+                    extra=dict(
+                        column_id=column_id,
+                        nickname=datum.nickname,
+                    ),
+                )
+
+            else:
+                LOGGER.debug(
+                    'Build XML report: column added',
+                    extra=dict(
+                        column_id=column_id,
+                        nickname=datum.nickname,
+                    ),
+                )
                 results.append(dict(
                     id=column_id,
                     nickname=datum.nickname,
@@ -61,13 +72,12 @@ class XMLReportBuilder:
         self,
         transformer: RegressionIntensityTransformer,
     ) -> Mapping[str, str]:
-        lb, ub = transformer.kernel.bounds
 
-        bounds = {
+        lb, ub = transformer.kernel.bounds
+        return {
             'lb': str(lb),
             'ub': str(ub),
         }
-        return bounds
 
     def _build_polynom(
         self,
@@ -78,6 +88,7 @@ class XMLReportBuilder:
         frame = datum.frame.copy()
         frame = frame.dropna(subset=['concentration'])
         frame = frame.groupby(level=0, sort=False).mean(numeric_only=True)
+
         frame['intensity_hat'] = transformer.predict(frame['intensity'])
 
         data = []

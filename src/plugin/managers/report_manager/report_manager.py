@@ -1,5 +1,4 @@
 import logging
-import time
 from collections.abc import Mapping
 
 from spectrumlab.peaks.analyte_peaks.intensity.transformers import RegressionIntensityTransformer
@@ -25,7 +24,6 @@ class ReportManager:
         transformers: Mapping[str, RegressionIntensityTransformer],
         dump: bool = False,
     ) -> str:
-        started_at = time.perf_counter()
 
         LOGGER.info(
             'Start report building with %s',
